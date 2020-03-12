@@ -1,13 +1,17 @@
 use crate::id::*;
 use serde::{Deserialize, Serialize};
 
+pub type ClassId = Id<Class>;
 pub type ClassMap = Map<Class>;
 pub type ClassMapBuilder = MapBuilder<Class>;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Class {
+    name: String,
+
     // GENERIC STUFF
-    health: i32,  // health obv
+    health: i32,  
+    mana: i32,
     swiftness: i32, // movement units
 
     // PHYSICAL STUFF
