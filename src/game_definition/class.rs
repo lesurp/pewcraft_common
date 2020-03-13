@@ -5,12 +5,25 @@ pub type ClassId = Id<Class>;
 pub type ClassMap = Map<Class>;
 pub type ClassMapBuilder = MapBuilder<Class>;
 
+// NOTE: we could generate the "Class" struct and the "Attribute" enum jonitly with e.g. a macro
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum Attribute {
+    Health,
+    Swiftness,
+    Strength,
+    Dexterity,
+    Armor,
+    Intelligence,
+    Concentration,
+    Willpower,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Class {
     name: String,
 
     // GENERIC STUFF
-    health: i32,  
+    health: i32,
     mana: i32,
     swiftness: i32, // movement units
 
