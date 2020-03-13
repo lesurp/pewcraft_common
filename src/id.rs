@@ -3,12 +3,23 @@ use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Id<T>(usize, PhantomData<T>);
 
 impl<T> Hash for Id<T> {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.hash(state);
+    }
+}
+
+/// Copy needs to be defined manually because of the PhantomData marker
+/// We can derive Copy but it simply doesn't work (no compilation error)
+impl<T> Copy for Id<T> {}
+
+/// Because we define Copy manually, we need to also define Clone manually
+impl<T> Clone for Id<T> {
+    fn clone(&self) -> Self {
+        *self
     }
 }
 
@@ -24,7 +35,7 @@ impl<T> Id<T> {
         Id(u, PhantomData)
     }
 
-    pub fn raw(self) -> usize {
+    pub fn raw(&self) -> usize {
         self.0
     }
 }
