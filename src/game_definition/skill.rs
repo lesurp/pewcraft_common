@@ -1,5 +1,5 @@
-use crate::buff::*;
-use crate::class::*;
+use crate::game_definition::buff::*;
+use crate::game_definition::class::*;
 use crate::id::*;
 use serde::{Deserialize, Serialize};
 

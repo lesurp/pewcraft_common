@@ -1,6 +1,6 @@
 use crate::id::*;
-use crate::class::*;
-use crate::buff::*;
+use crate::game_definition::class::*;
+use crate::game_definition::buff::*;
 use serde::{Deserialize, Serialize};
 
 pub type CharacterId = Id<Character>;

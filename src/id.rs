@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct Id<T>(usize, PhantomData<T>);
 
 impl<T> Hash for Id<T> {
@@ -20,8 +20,12 @@ impl<T> PartialEq for Id<T> {
 impl<T> Eq for Id<T> {}
 
 impl<T> Id<T> {
-    fn new(u: usize) -> Self {
+    pub fn new(u: usize) -> Self {
         Id(u, PhantomData)
+    }
+
+    pub fn raw(self) -> usize {
+        self.0
     }
 }
 
