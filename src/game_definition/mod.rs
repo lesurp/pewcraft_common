@@ -18,7 +18,7 @@ pub struct GameDefinition {
     pub classes: Map<Class>,
     pub skills: Map<Skill>,
     pub effects: Map<Effect>,
-    pub maps: Vec<GameMap>,
+    pub maps: Map<GameMap>,
 
     pub class_to_skills: HashMap<ClassId, Vec<SkillId>>,
     pub skill_to_classes: HashMap<SkillId, Vec<ClassId>>,

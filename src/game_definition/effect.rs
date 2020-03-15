@@ -63,7 +63,9 @@ pub enum BuffKind {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Buff {
     name: String,
-    range: Range,
+    /// None means the damage will be applied to the given cell only (i.e. no "explosion" around
+    /// the target)
+    range: Option<Range>,
     success_rate: Option<f32>,
     duration: i32,
     kind: BuffKind,
@@ -75,7 +77,7 @@ pub struct DirectDamage {
     /// None means the damage will be applied to the given cell only (i.e. no "explosion" around
     /// the target)
     range: Option<Range>,
-    kind: Damage,
+    damage: Damage,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -87,5 +89,5 @@ pub enum EffectKind {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Effect {
     id: EffectId,
-    effect: EffectKind,
+    kind: EffectKind,
 }

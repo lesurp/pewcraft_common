@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{hash_map::Iter, HashMap};
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 
@@ -55,6 +55,16 @@ impl<T> Id<T> {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Map<T>(HashMap<Id<T>, T>);
+
+impl<T> Map<T> {
+    pub fn get(&self, id: Id<T>) -> Option<&T> {
+        self.0.get(&id)
+    }
+
+    pub fn iter(&self) -> Iter<'_, Id<T>, T> {
+        self.0.iter()
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
 pub struct MapBuilder<T>(HashMap<Id<T>, T>, usize);
