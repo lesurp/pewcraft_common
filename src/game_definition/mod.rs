@@ -1,20 +1,25 @@
-use class::{Class, ClassId};
-use map::GameMap;
-use serde::{Deserialize, Serialize};
-use skill::{Skill, SkillId};
-use std::collections::HashMap;
+use crate::id::Map;
+pub use class::{Class, ClassId};
+pub use damage::Damage;
+pub use effect::{Buff, Effect};
+pub use map::GameMap;
+pub use serde::{Deserialize, Serialize};
+pub use skill::{Skill, SkillId};
+pub use std::collections::HashMap;
 
-pub mod buff;
 pub mod class;
+pub mod damage;
+pub mod effect;
 pub mod map;
 pub mod skill;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GameDefinition {
-    classes: HashMap<ClassId, Class>,
-    skills: HashMap<SkillId, Skill>,
-    maps: Vec<GameMap>,
+    pub classes: Map<Class>,
+    pub skills: Map<Skill>,
+    pub effects: Map<Effect>,
+    pub maps: Vec<GameMap>,
 
-    class_to_skills: HashMap<ClassId, Vec<SkillId>>,
-    skill_to_classes: HashMap<SkillId, Vec<ClassId>>,
+    pub class_to_skills: HashMap<ClassId, Vec<SkillId>>,
+    pub skill_to_classes: HashMap<SkillId, Vec<ClassId>>,
 }

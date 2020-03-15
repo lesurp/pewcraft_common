@@ -1,10 +1,11 @@
 use crate::game_definition::class::Attribute;
 use crate::id::*;
 use serde::{Deserialize, Serialize};
+use crate::game_definition::damage::Damage;
 
-pub type BuffId = Id<Buff>;
-pub type BuffMap = Map<Buff>;
-pub type ClassMapBuilder = MapBuilder<Buff>;
+pub type EffectId = Id<Effect>;
+pub type EffectMap = Map<Effect>;
+pub type EffectMapBuilder = MapBuilder<Effect>;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Target {
@@ -33,7 +34,8 @@ pub enum RangeKind {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Range {
     // number of cells from initial one e.g. 0 means only on oneself
-    range: u32,
+    min: u32,
+    max: u32,
 
     // how should the area be covered
     kind: RangeKind,
@@ -52,21 +54,38 @@ pub enum ValueKind {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum BuffKind {
-    // *all* skills apply buffs - direct damage are just buffs we apply directly
-    Damage(ValueKind),
     // negative values mean healing i.e. HoT
-    DoT(ValueKind),
-    AttributeF(Attribute, ValueKind),
+    DoT(Damage),
+    // TODO change that
+    Attribute(Attribute, ValueKind),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Buff {
-    // NOTE: we *require* ids during deserialisation, as those are required when deserialising
-    // skills (as they applied the buffs)
-    id: BuffId,
     name: String,
     range: Range,
-    success_rate: f32,
+    success_rate: Option<f32>,
     duration: i32,
     kind: BuffKind,
+    // TODO: add initial stats of attacker somewhere here
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DirectDamage {
+    /// None means the damage will be applied to the given cell only (i.e. no "explosion" around
+    /// the target)
+    range: Option<Range>,
+    kind: Damage,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub enum EffectKind {
+    DirectDamage(DirectDamage),
+    Buff(Buff),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Effect {
+    id: EffectId,
+    effect: EffectKind,
 }
