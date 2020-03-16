@@ -28,7 +28,7 @@ pub struct Damage {
 impl Damage {
     pub fn compute_damage(
         &self,
-        classes: Map<Class>,
+        classes: &Map<Class>,
         attacker: &Character,
         defender: &Character,
     ) -> i32 {

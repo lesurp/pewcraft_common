@@ -12,6 +12,12 @@ pub type ClassMapBuilder = MapBuilder<Character>;
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuffInstance(Buff, ());
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub enum Team {
+    Evil,
+    Eviler,
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Character {
     pub name: String,
@@ -21,6 +27,7 @@ pub struct Character {
     pub current_mana: i32,
     pub position: CellId,
     pub buffs: Vec<BuffInstance>,
+    pub team: Team,
 }
 
 impl Character {
@@ -29,6 +36,7 @@ impl Character {
         position: CellId,
         class: &Class,
         name: S,
+        team: Team,
     ) -> Character {
         Character {
             name: name.into(),
@@ -37,6 +45,7 @@ impl Character {
             current_mana: class.mana,
             position,
             buffs: Vec::new(),
+            team,
         }
     }
 

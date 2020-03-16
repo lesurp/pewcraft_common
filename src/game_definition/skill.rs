@@ -10,10 +10,10 @@ pub type ClassMapBuilder = MapBuilder<Skill>;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Skill {
-    name: String,
+    pub name: String,
 
-    cost: i32,
-    range: Range,
-    precision: Option<f32>,
-    effects: HashSet<EffectId>,
+    pub cost: i32,
+    pub range: Range,
+    pub precision: Option<f32>,
+    pub effects: HashSet<EffectId>,
 }

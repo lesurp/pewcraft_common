@@ -9,6 +9,12 @@ pub type GameMapId = Id<GameMap>;
 pub type CellId = Id<Cell>;
 pub type GameMapBuilder = MapBuilder<GameMap>;
 
+impl CellId {
+    fn invalid() -> CellId {
+        CellId::new(std::usize::MAX)
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum CellAttibute {
     None,
@@ -37,13 +43,13 @@ pub struct GameMap {
 // Used internally for the A* path computation
 #[derive(Eq)]
 struct Node {
-    real_cost: i32,
-    heuristic: i32,
+    real_cost: u32,
+    heuristic: u32,
     curr_cell: CellId,
 }
 
 impl Node {
-    fn cost(&self) -> i32 {
+    fn cost(&self) -> u32 {
         self.real_cost + self.heuristic
     }
 }
@@ -90,6 +96,12 @@ impl GameMap {
         (x, y)
     }
 
+    pub fn id_to_xy_i32(&self, id: CellId) -> (i32, i32) {
+        let x = id.raw() % self.width;
+        let y = (id.raw() - x) / self.width;
+        (x as i32, y as i32)
+    }
+
     fn surrounding_cells(&self, c: CellId) -> [CellId; 4] {
         let (x, y) = self.id_to_xy(c);
 
@@ -97,10 +109,26 @@ impl GameMap {
         // however those ids are unsigned, meaning that they will be invalidated when using
         // is_valid_cell anyway
         [
-            self.xy_to_id(x + 1, y),
-            self.xy_to_id(x, y + 1),
-            self.xy_to_id(x - 1, y),
-            self.xy_to_id(x, y - 1),
+            if x + 1 < self.width {
+                self.xy_to_id(x + 1, y)
+            } else {
+                CellId::invalid()
+            },
+            if y + 1 < self.height {
+                self.xy_to_id(x, y + 1)
+            } else {
+                CellId::invalid()
+            },
+            if x > 0 {
+                self.xy_to_id(x - 1, y)
+            } else {
+                CellId::invalid()
+            },
+            if y > 0 {
+                self.xy_to_id(x, y - 1)
+            } else {
+                CellId::invalid()
+            },
         ]
     }
 
@@ -108,10 +136,10 @@ impl GameMap {
         self.data.len() > c.raw()
     }
 
-    fn distance(&self, a: CellId, b: CellId) -> i32 {
+    pub fn distance(&self, a: CellId, b: CellId) -> u32 {
         let (ax, ay) = self.id_to_xy(a);
         let (bx, by) = self.id_to_xy(b);
-        (ax as i32 - bx as i32) + (ay as i32 - by as i32)
+        ((ax as i32 - bx as i32).abs() + (ay as i32 - by as i32).abs()) as u32
     }
 
     pub fn can_move_to(&self, start: CellId, end: CellId, swiftness: i32) -> bool {
@@ -131,7 +159,7 @@ impl GameMap {
             };
 
             // our two exit conditions (arrived, or too long)
-            if swiftness < n.cost() {
+            if swiftness < n.cost() as i32 {
                 return false;
             } else if end == n.curr_cell {
                 return true;
@@ -146,7 +174,8 @@ impl GameMap {
 
                 let next_cell = &self[neighbor];
 
-                let additional_cost = next_cell.height - prev_cell.height + 1;
+                let additional_cost =
+                    std::cmp::max(0, next_cell.height - prev_cell.height) as u32 + 1;
 
                 nodes.push(Reverse(Node {
                     real_cost: n.real_cost + additional_cost,

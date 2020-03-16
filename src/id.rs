@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
-use std::collections::{hash_map::Iter, HashMap};
+use std::collections::{
+    hash_map::{Iter, IterMut},
+    HashMap,
+};
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
 
@@ -61,8 +64,16 @@ impl<T> Map<T> {
         self.0.get(&id)
     }
 
+    pub fn get_mut(&mut self, id: Id<T>) -> Option<&mut T> {
+        self.0.get_mut(&id)
+    }
+
     pub fn iter(&self) -> Iter<'_, Id<T>, T> {
         self.0.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> IterMut<'_, Id<T>, T> {
+        self.0.iter_mut()
     }
 }
 
