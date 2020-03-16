@@ -53,6 +53,10 @@ impl GameState {
         self.turn_order = turn_order.iter().map(|(id, _)| **id).collect::<Vec<_>>();
     }
 
+    pub fn player_to_play(&self) -> Option<CharacterId> {
+        self.turn_order.last().cloned()
+    }
+
     pub fn next_action(&mut self, g: &GameDefinition, ga: Action) -> Result<bool, ()> {
         match (ga, self.turn_state) {
             (Action::Skill(skill_id, cell_id), _) => self.execute_skill(g, skill_id, cell_id),
