@@ -32,8 +32,8 @@ impl Damage {
         attacker: &Character,
         defender: &Character,
     ) -> i32 {
-        let c_att = classes.get(attacker.class).unwrap();
-        let c_def = classes.get(defender.class).unwrap();
+        let c_att = classes.get(attacker.class).expect("Invalid attacker class");
+        let c_def = classes.get(defender.class).expect("Invalid attacker class");
 
         let physical_raw = self.flat_physical
             + ((self.perc_physical * defender.effective_health(c_def) as f32) as i32)

@@ -1,5 +1,6 @@
 use crate::character::Character;
 use crate::effect::{EffectKind, Range, RangeKind, Target};
+use crate::error::Error;
 use crate::game_definition::GameDefinition;
 use crate::id_map::{Id, IdMap};
 use crate::map::{Cell, GameMap};
@@ -44,7 +45,7 @@ impl GameState {
 
         let mut turn_order = self.characters.iter().collect::<Vec<_>>();
         turn_order.sort_by_key(|(_, character)| {
-            let class = g.classes.get(character.class).unwrap();
+            let class = g.classes.get(character.class).expect("Invalid class id");
             character.effective_swiftness(class)
         });
         self.turn_order = turn_order.iter().map(|(id, _)| **id).collect::<Vec<_>>();
@@ -54,10 +55,25 @@ impl GameState {
         self.turn_order.last().cloned()
     }
 
-    pub fn next_action(&mut self, g: &GameDefinition, ga: Action) -> Result<bool, ()> {
+    pub fn next_action(&mut self, g: &GameDefinition, ga: Action) -> Result<bool, Error> {
+        let curr_char = self
+            .characters
+            .get(
+                *self
+                    .turn_order
+                    .last()
+                    .expect("Turn is finished and should be reset"),
+            )
+            .expect("Invalid character id")
+            .clone();
+
         match (ga, self.turn_state) {
-            (Action::Skill(skill_id, cell_id), _) => self.execute_skill(g, skill_id, cell_id),
-            (Action::Movement(cell_id), TurnState::MoveOrAction) => self.execute_move(g, cell_id),
+            (Action::Skill(skill_id, cell_id), _) => {
+                self.execute_skill(curr_char, g, skill_id, cell_id)
+            }
+            (Action::Movement(cell_id), TurnState::MoveOrAction) => {
+                self.execute_move(curr_char, g, cell_id)
+            }
             (_, _) => panic!("Wrong action :<<<"),
         }
     }
@@ -70,19 +86,15 @@ impl GameState {
 
     fn execute_skill(
         &mut self,
+        curr_char: Character,
         g: &GameDefinition,
         skill_id: Id<Skill>,
         cell_id: Id<Cell>,
-    ) -> Result<bool, ()> {
-        assert!(!self.turn_order.is_empty());
-        let curr_char = self
-            .characters
-            .get(*self.turn_order.last().unwrap())
-            .unwrap();
-        let skill = g.skills.get(skill_id).unwrap();
+    ) -> Result<bool, Error> {
+        let skill = g.skills.get(skill_id).ok_or(Error::InvalidSkill)?;
         let target = self.player_at(cell_id);
 
-        if !GameState::check_target(curr_char, &target, skill.range.target) {
+        if !GameState::check_target(&curr_char, &target, skill.range.target) {
             panic!("Wrong target!");
         }
 
@@ -98,7 +110,7 @@ impl GameState {
         if true {
             if let Some((id, target)) = target {
                 for effect in &skill.effects {
-                    let effect = g.effects.get(*effect).unwrap();
+                    let effect = g.effects.get(*effect).expect("Invalid effect id");
                     match &effect.kind {
                         // TODO
                         EffectKind::Buff(_) => unimplemented!(),
@@ -108,7 +120,7 @@ impl GameState {
                         EffectKind::DirectDamage(direct_damage) => {
                             let damage = direct_damage
                                 .damage
-                                .compute_damage(&g.classes, curr_char, target);
+                                .compute_damage(&g.classes, &curr_char, target);
                             game_state_updates.insert((*id, damage));
                         }
                     }
@@ -118,7 +130,7 @@ impl GameState {
 
         // TODO stuff if dead
         for (id, damage) in game_state_updates {
-            let character = self.characters.get_mut(id).unwrap();
+            let character = self.characters.get_mut(id).expect("Invalid character id");
             character.current_health -= damage;
         }
 
@@ -149,7 +161,7 @@ impl GameState {
         end: Id<Cell>,
         range: Range,
     ) -> bool {
-        let map = g.maps.get(self.map).unwrap();
+        let map = g.maps.get(self.map).expect("Invalid game map id");
 
         match range.kind {
             RangeKind::Star => {
@@ -184,19 +196,24 @@ impl GameState {
         }
     }
 
-    fn execute_move(&mut self, g: &GameDefinition, cell_id: Id<Cell>) -> Result<bool, ()> {
+    fn execute_move(
+        &mut self,
+        curr_char: Character,
+        g: &GameDefinition,
+        cell_id: Id<Cell>,
+    ) -> Result<bool, Error> {
         assert!(!self.turn_order.is_empty());
 
-        let curr_char = self
-            .characters
-            .get(*self.turn_order.last().unwrap())
-            .unwrap();
-        let class = g.classes.get(curr_char.class).unwrap();
-        if g.maps.get(self.map).unwrap().can_move_to(
-            curr_char.position,
-            cell_id,
-            curr_char.effective_swiftness(class),
-        ) {
+        let class = g.classes.get(curr_char.class).expect("Invalid class id");
+        if g.maps
+            .get(self.map)
+            .expect("Invalid game map id")
+            .can_move_to(
+                curr_char.position,
+                cell_id,
+                curr_char.effective_swiftness(class),
+            )
+        {
             self.turn_state = TurnState::ActionOnly;
             Ok(false)
         } else {

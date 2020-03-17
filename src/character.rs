@@ -1,5 +1,7 @@
 use crate::class::Class;
 use crate::effect::Buff;
+use crate::error::Error;
+use crate::game_definition::GameDefinition;
 use crate::id_map::{Id, IdMap, IdMapBuilder};
 use crate::map::Cell;
 use crate::map::Team;
@@ -7,36 +9,46 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
 #[derive(Debug)]
-pub struct CharacterMapBuilder {
+pub struct CharacterMapBuilder<'a> {
     builder: IdMapBuilder<Character>,
     empty_starting_cells: Vec<(usize, HashSet<Id<Cell>>)>,
+    game_definition: &'a GameDefinition,
 }
 
-impl CharacterMapBuilder {
-    pub fn new(teams: &[Team], team_size: usize) -> Self {
+impl<'a> CharacterMapBuilder<'a> {
+    pub fn new(game_definition: &'a GameDefinition, teams: &[Team], team_size: usize) -> Self {
         CharacterMapBuilder {
             builder: IdMapBuilder::new(),
             empty_starting_cells: teams
                 .iter()
                 .map(|team| (team_size, team.1.clone()))
                 .collect(),
+            game_definition,
         }
     }
 
-    pub fn add(&mut self, c: Character) -> Result<(), ()> {
+    pub fn add(&mut self, c: Character) -> Result<(), Error> {
         let (spots_left, cells_left) = &mut self
             .empty_starting_cells
             .get_mut(c.team.raw())
             .expect("Wrong team id was assigned to the character");
 
+        if self.game_definition.classes.get(c.class).is_none() {
+            return Err(Error::InvalidCharacterClass);
+        }
+
+        if c.name.trim().is_empty() {
+            return Err(Error::InvalidCharacterName);
+        }
+
         // Team is full
         if *spots_left == 0 {
-            return Err(());
+            return Err(Error::TeamFull);
         }
 
         // Available cells left
         if !cells_left.remove(&c.position) {
-            return Err(());
+            return Err(Error::InvalidStartingCell);
         }
 
         *spots_left -= 1;

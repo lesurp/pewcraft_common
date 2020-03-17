@@ -1,3 +1,6 @@
+mod error;
+pub use error::Error;
+
 mod id_map;
 pub use id_map::{Id, IdMap, IdMapBuilder};
 

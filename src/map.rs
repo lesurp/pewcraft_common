@@ -1,3 +1,4 @@
+use crate::error::Error;
 use crate::id_map::Id;
 use log::debug;
 use serde::{Deserialize, Serialize};
@@ -70,9 +71,18 @@ impl PartialEq for Node {
 }
 
 impl GameMap {
-    pub fn check_validity(&self) -> Result<(), ()> {
+    pub fn check_validity(&self) -> Result<(), Error> {
         if self.height * self.width != self.data.len() {
-            return Err(());
+            return Err(Error::InvalidMapSize);
+        }
+
+        let mut starting_cells = HashSet::new();
+        for Team(_, cells) in &self.teams {
+            for cell in cells {
+                if !starting_cells.insert(cell) {
+                    return Err(Error::OverlappingStartingCells);
+                }
+            }
         }
 
         debug!(
