@@ -1,13 +1,9 @@
-use crate::id::*;
+use crate::id_map::Id;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::cmp::{Ord, Ordering, Reverse};
 use std::collections::{BinaryHeap, HashSet};
 use std::ops::Index;
-
-pub type GameMapId = Id<GameMap>;
-pub type CellId = Id<Cell>;
-pub type GameMapBuilder = MapBuilder<GameMap>;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Copy)]
 pub struct TeamId(usize);
@@ -23,11 +19,11 @@ impl TeamId {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct Team(pub String, pub HashSet<CellId>);
+pub struct Team(pub String, pub HashSet<Id<Cell>>);
 
-impl CellId {
-    fn invalid() -> CellId {
-        CellId::new(std::usize::MAX)
+impl Id<Cell> {
+    fn invalid() -> Id<Cell> {
+        Id::new(std::usize::MAX)
     }
 }
 
@@ -60,7 +56,7 @@ pub struct GameMap {
 struct Node {
     real_cost: u32,
     heuristic: u32,
-    curr_cell: CellId,
+    curr_cell: Id<Cell>,
 }
 
 impl Node {
@@ -99,23 +95,23 @@ impl GameMap {
         Ok(())
     }
 
-    pub fn xy_to_id(&self, x: usize, y: usize) -> CellId {
-        CellId::new(y * self.width + x)
+    pub fn xy_to_id(&self, x: usize, y: usize) -> Id<Cell> {
+        Id::new(y * self.width + x)
     }
 
-    pub fn id_to_xy(&self, id: CellId) -> (usize, usize) {
+    pub fn id_to_xy(&self, id: Id<Cell>) -> (usize, usize) {
         let x = id.raw() % self.width;
         let y = (id.raw() - x) / self.width;
         (x, y)
     }
 
-    pub fn id_to_xy_i32(&self, id: CellId) -> (i32, i32) {
+    pub fn id_to_xy_i32(&self, id: Id<Cell>) -> (i32, i32) {
         let x = id.raw() % self.width;
         let y = (id.raw() - x) / self.width;
         (x as i32, y as i32)
     }
 
-    fn surrounding_cells(&self, c: CellId) -> [CellId; 4] {
+    fn surrounding_cells(&self, c: Id<Cell>) -> [Id<Cell>; 4] {
         let (x, y) = self.id_to_xy(c);
 
         // NOTE: those values WILL underflow for the first row
@@ -125,37 +121,37 @@ impl GameMap {
             if x + 1 < self.width {
                 self.xy_to_id(x + 1, y)
             } else {
-                CellId::invalid()
+                Id::invalid()
             },
             if y + 1 < self.height {
                 self.xy_to_id(x, y + 1)
             } else {
-                CellId::invalid()
+                Id::invalid()
             },
             if x > 0 {
                 self.xy_to_id(x - 1, y)
             } else {
-                CellId::invalid()
+                Id::invalid()
             },
             if y > 0 {
                 self.xy_to_id(x, y - 1)
             } else {
-                CellId::invalid()
+                Id::invalid()
             },
         ]
     }
 
-    fn is_valid_cell(&self, c: CellId) -> bool {
+    fn is_valid_cell(&self, c: Id<Cell>) -> bool {
         self.data.len() > c.raw()
     }
 
-    pub fn distance(&self, a: CellId, b: CellId) -> u32 {
+    pub fn distance(&self, a: Id<Cell>, b: Id<Cell>) -> u32 {
         let (ax, ay) = self.id_to_xy(a);
         let (bx, by) = self.id_to_xy(b);
         ((ax as i32 - bx as i32).abs() + (ay as i32 - by as i32).abs()) as u32
     }
 
-    pub fn can_move_to(&self, start: CellId, end: CellId, swiftness: i32) -> bool {
+    pub fn can_move_to(&self, start: Id<Cell>, end: Id<Cell>, swiftness: i32) -> bool {
         let mut nodes = BinaryHeap::new();
         nodes.push(Reverse(Node {
             real_cost: 0,
@@ -200,18 +196,18 @@ impl GameMap {
     }
 }
 
-impl Index<CellId> for GameMap {
+impl Index<Id<Cell>> for GameMap {
     type Output = Cell;
 
-    fn index(&self, id: CellId) -> &Self::Output {
+    fn index(&self, id: Id<Cell>) -> &Self::Output {
         &self.data[id.raw()]
     }
 }
 
 #[cfg(test)]
 mod test {
-    use super::CellId;
     use super::GameMap;
+    use crate::id_map::Id;
 
     #[test]
     fn test_xy_to_id() {
@@ -222,8 +218,7 @@ mod test {
             width: w,
             height: h,
             data: Vec::new(),
-            starting_cells_1: Default::default(),
-            starting_cells_2: Default::default(),
+            teams: Default::default(),
         };
 
         let x = 1;
@@ -243,11 +238,10 @@ mod test {
             width: w,
             height: h,
             data: Vec::new(),
-            starting_cells_1: Default::default(),
-            starting_cells_2: Default::default(),
+            teams: Default::default(),
         };
 
-        let cell_id = CellId::new(22);
+        let cell_id = Id::new(22);
         let (x, y) = map.id_to_xy(cell_id);
 
         assert_eq!(x, 2);
@@ -263,11 +257,10 @@ mod test {
             width: w,
             height: h,
             data: Vec::new(),
-            starting_cells_1: Default::default(),
-            starting_cells_2: Default::default(),
+            teams: Default::default(),
         };
 
-        let cell_id = CellId::new(22);
+        let cell_id = Id::new(22);
         let (x, y) = map.id_to_xy(cell_id);
 
         assert_eq!(cell_id, map.xy_to_id(x, y));

@@ -1,7 +1,4 @@
-use crate::id::*;
 use serde::{Deserialize, Serialize};
-
-pub type ClassId = Id<Class>;
 
 // NOTE: we could generate the "Class" struct and the "Attribute" enum jonitly with e.g. a macro
 #[derive(Serialize, Deserialize, Debug, Clone)]

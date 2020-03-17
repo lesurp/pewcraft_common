@@ -1,12 +1,7 @@
-use crate::effect::{EffectId, Range};
-use crate::id::*;
+use crate::effect::{Effect, Range};
+use crate::id_map::Id;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
-
-pub type SkillId = Id<Skill>;
-pub type SkillMap = Map<Skill>;
-pub type ClassMapBuilder = MapBuilder<Skill>;
-
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Skill {
@@ -15,5 +10,5 @@ pub struct Skill {
     pub cost: i32,
     pub range: Range,
     pub precision: Option<f32>,
-    pub effects: HashSet<EffectId>,
+    pub effects: HashSet<Id<Effect>>,
 }

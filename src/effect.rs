@@ -1,11 +1,7 @@
 use crate::class::Attribute;
 use crate::damage::Damage;
-use crate::id::*;
+use crate::id_map::Id;
 use serde::{Deserialize, Serialize};
-
-pub type EffectId = Id<Effect>;
-pub type EffectMap = Map<Effect>;
-pub type EffectMapBuilder = MapBuilder<Effect>;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Target {
@@ -86,6 +82,6 @@ pub enum EffectKind {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Effect {
-    pub id: EffectId,
+    pub id: Id<Effect>,
     pub kind: EffectKind,
 }

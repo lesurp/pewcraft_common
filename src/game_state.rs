@@ -1,10 +1,9 @@
-
+use crate::character::Character;
 use crate::effect::{EffectKind, Range, RangeKind, Target};
-use crate::map::{CellId, GameMapId};
-use crate::skill::SkillId;
 use crate::game_definition::GameDefinition;
-use crate::id::Map;
-use crate::character::{Character, CharacterId};
+use crate::id_map::{Id, IdMap};
+use crate::map::{Cell, GameMap};
+use crate::skill::Skill;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -16,20 +15,20 @@ pub enum TurnState {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum Action {
-    Movement(CellId),
-    Skill(SkillId, CellId),
+    Movement(Id<Cell>),
+    Skill(Id<Skill>, Id<Cell>),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GameState {
-    characters: Map<Character>,
-    map: GameMapId,
-    turn_order: Vec<CharacterId>,
+    characters: IdMap<Character>,
+    map: Id<GameMap>,
+    turn_order: Vec<Id<Character>>,
     turn_state: TurnState,
 }
 
 impl GameState {
-    pub fn new(g: &GameDefinition, characters: Map<Character>, map: GameMapId) -> GameState {
+    pub fn new(g: &GameDefinition, characters: IdMap<Character>, map: Id<GameMap>) -> GameState {
         let mut gs = GameState {
             characters,
             map,
@@ -51,7 +50,7 @@ impl GameState {
         self.turn_order = turn_order.iter().map(|(id, _)| **id).collect::<Vec<_>>();
     }
 
-    pub fn player_to_play(&self) -> Option<CharacterId> {
+    pub fn player_to_play(&self) -> Option<Id<Character>> {
         self.turn_order.last().cloned()
     }
 
@@ -63,7 +62,7 @@ impl GameState {
         }
     }
 
-    fn player_at(&self, cell_id: CellId) -> Option<(&CharacterId, &Character)> {
+    fn player_at(&self, cell_id: Id<Cell>) -> Option<(&Id<Character>, &Character)> {
         self.characters
             .iter()
             .find(|(_, character)| character.position == cell_id)
@@ -72,8 +71,8 @@ impl GameState {
     fn execute_skill(
         &mut self,
         g: &GameDefinition,
-        skill_id: SkillId,
-        cell_id: CellId,
+        skill_id: Id<Skill>,
+        cell_id: Id<Cell>,
     ) -> Result<bool, ()> {
         assert!(!self.turn_order.is_empty());
         let curr_char = self
@@ -94,7 +93,7 @@ impl GameState {
         // TODO check LOS
 
         // FIXME: this is a borrow-checker workaround... but probably the only actual one..?
-        let mut game_state_updates = HashSet::<(CharacterId, i32)>::new();
+        let mut game_state_updates = HashSet::<(Id<Character>, i32)>::new();
         // TODO: compute if hit?
         if true {
             if let Some((id, target)) = target {
@@ -129,7 +128,7 @@ impl GameState {
 
     fn check_target(
         attacker: &Character,
-        target_opt: &Option<(&CharacterId, &Character)>,
+        target_opt: &Option<(&Id<Character>, &Character)>,
         target_kind: Target,
     ) -> bool {
         if let Some((_, target)) = target_opt {
@@ -143,7 +142,13 @@ impl GameState {
         }
     }
 
-    fn check_range(&self, g: &GameDefinition, start: CellId, end: CellId, range: Range) -> bool {
+    fn check_range(
+        &self,
+        g: &GameDefinition,
+        start: Id<Cell>,
+        end: Id<Cell>,
+        range: Range,
+    ) -> bool {
         let map = g.maps.get(self.map).unwrap();
 
         match range.kind {
@@ -179,7 +184,7 @@ impl GameState {
         }
     }
 
-    fn execute_move(&mut self, g: &GameDefinition, cell_id: CellId) -> Result<bool, ()> {
+    fn execute_move(&mut self, g: &GameDefinition, cell_id: Id<Cell>) -> Result<bool, ()> {
         assert!(!self.turn_order.is_empty());
 
         let curr_char = self

@@ -1,15 +1,16 @@
-use crate::map::CellId;
-use crate::skill::SkillId;
+use crate::id_map::Id;
+use crate::map::Cell;
+use crate::skill::Skill;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum ActionKind {
     Movement,
-    Skill(SkillId),
+    Skill(Id<Skill>),
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Action {
     kind: ActionKind,
-    target: CellId,
+    target: Id<Cell>,
 }

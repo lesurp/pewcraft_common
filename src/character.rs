@@ -1,23 +1,21 @@
-use crate::class::*;
+use crate::class::Class;
 use crate::effect::Buff;
-use crate::map::{CellId, Team, TeamId};
-use crate::id::*;
+use crate::id_map::{Id, IdMap, IdMapBuilder};
+use crate::map::Cell;
+use crate::map::Team;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
-pub type CharacterId = Id<Character>;
-pub type CharacterMap = Map<Character>;
-
 #[derive(Debug)]
 pub struct CharacterMapBuilder {
-    builder: MapBuilder<Character>,
-    empty_starting_cells: Vec<(usize, HashSet<CellId>)>,
+    builder: IdMapBuilder<Character>,
+    empty_starting_cells: Vec<(usize, HashSet<Id<Cell>>)>,
 }
 
 impl CharacterMapBuilder {
     pub fn new(teams: &[Team], team_size: usize) -> Self {
         CharacterMapBuilder {
-            builder: MapBuilder::new(),
+            builder: IdMapBuilder::new(),
             empty_starting_cells: teams
                 .iter()
                 .map(|team| (team_size, team.1.clone()))
@@ -46,7 +44,7 @@ impl CharacterMapBuilder {
         Ok(())
     }
 
-    pub fn build(self) -> Result<CharacterMap, Self> {
+    pub fn build(self) -> Result<IdMap<Character>, Self> {
         for (spots_left, _) in &self.empty_starting_cells {
             if *spots_left > 0 {
                 return Err(self);
@@ -63,22 +61,22 @@ pub struct BuffInstance(Buff, ());
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Character {
     pub name: String,
-    pub class: ClassId,
+    pub class: Id<Class>,
 
     pub current_health: i32,
     pub current_mana: i32,
-    pub position: CellId,
+    pub position: Id<Cell>,
     pub buffs: Vec<BuffInstance>,
-    pub team: TeamId,
+    pub team: Id<Team>,
 }
 
 impl Character {
     pub fn new<S: Into<String>>(
-        id: ClassId,
-        position: CellId,
+        id: Id<Class>,
+        position: Id<Cell>,
         class: &Class,
         name: S,
-        team: TeamId,
+        team: Id<Team>,
     ) -> Character {
         Character {
             name: name.into(),

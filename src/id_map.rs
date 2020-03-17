@@ -57,9 +57,9 @@ impl<T> Id<T> {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Map<T>(HashMap<Id<T>, T>);
+pub struct IdMap<T>(HashMap<Id<T>, T>);
 
-impl<T> Map<T> {
+impl<T> IdMap<T> {
     pub fn get(&self, id: Id<T>) -> Option<&T> {
         self.0.get(&id)
     }
@@ -78,11 +78,11 @@ impl<T> Map<T> {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
-pub struct MapBuilder<T>(HashMap<Id<T>, T>, usize);
+pub struct IdMapBuilder<T>(HashMap<Id<T>, T>, usize);
 
-impl<T> MapBuilder<T> {
+impl<T> IdMapBuilder<T> {
     pub fn new() -> Self {
-        MapBuilder(HashMap::new(), 0)
+        IdMapBuilder(HashMap::new(), 0)
     }
 
     pub fn add(&mut self, t: T) -> Id<T> {
@@ -92,7 +92,7 @@ impl<T> MapBuilder<T> {
         id
     }
 
-    pub fn build(self) -> Map<T> {
-        Map(self.0)
+    pub fn build(self) -> IdMap<T> {
+        IdMap(self.0)
     }
 }

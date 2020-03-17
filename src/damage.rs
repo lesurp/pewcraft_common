@@ -1,6 +1,6 @@
-use crate::class::Class;
-use crate::id::Map;
 use crate::character::Character;
+use crate::class::Class;
+use crate::id_map::IdMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -28,7 +28,7 @@ pub struct Damage {
 impl Damage {
     pub fn compute_damage(
         &self,
-        classes: &Map<Class>,
+        classes: &IdMap<Class>,
         attacker: &Character,
         defender: &Character,
     ) -> i32 {
