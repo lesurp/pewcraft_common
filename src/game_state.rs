@@ -18,6 +18,7 @@ pub enum TurnState {
 pub enum Action {
     Movement(Id<Cell>),
     Skill(Id<Skill>, Id<Cell>),
+    Pass,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -40,7 +41,7 @@ impl GameState {
         gs
     }
 
-    pub fn new_turn(&mut self, g: &GameDefinition) {
+    fn new_turn(&mut self, g: &GameDefinition) {
         assert!(self.turn_order.is_empty());
 
         let mut turn_order = self.characters.iter().collect::<Vec<_>>();
@@ -68,14 +69,25 @@ impl GameState {
             .clone();
 
         match (ga, self.turn_state) {
+            (Action::Pass, _) => {
+                self.turn_order.pop();
+            }
             (Action::Skill(skill_id, cell_id), _) => {
-                self.execute_skill(curr_char, g, skill_id, cell_id)
+                self.execute_skill(curr_char, g, skill_id, cell_id)?;
+                self.turn_order.pop();
             }
             (Action::Movement(cell_id), TurnState::MoveOrAction) => {
-                self.execute_move(curr_char, g, cell_id)
+                self.execute_move(curr_char, g, cell_id)?;
             }
-            (_, _) => panic!("Wrong action :<<<"),
+            (Action::Movement(_), TurnState::ActionOnly) => return Err(Error::AlreadyMoved),
         }
+
+        Ok(if self.turn_order.is_empty() {
+            self.new_turn(g);
+            true
+        } else {
+            false
+        })
     }
 
     fn player_at(&self, cell_id: Id<Cell>) -> Option<(&Id<Character>, &Character)> {
@@ -90,16 +102,16 @@ impl GameState {
         g: &GameDefinition,
         skill_id: Id<Skill>,
         cell_id: Id<Cell>,
-    ) -> Result<bool, Error> {
+    ) -> Result<(), Error> {
         let skill = g.skills.get(skill_id).ok_or(Error::InvalidSkill)?;
         let target = self.player_at(cell_id);
 
         if !GameState::check_target(&curr_char, &target, skill.range.target) {
-            panic!("Wrong target!");
+            return Err(Error::InvalidTarget);
         }
 
         if !self.check_range(g, curr_char.position, cell_id, skill.range) {
-            panic!("Wrong range...");
+            return Err(Error::InvalidRange);
         }
 
         // TODO check LOS
@@ -134,8 +146,7 @@ impl GameState {
             character.current_health -= damage;
         }
 
-        self.turn_order.pop();
-        Ok(self.turn_order.is_empty())
+        Ok(())
     }
 
     fn check_target(
@@ -201,7 +212,7 @@ impl GameState {
         curr_char: Character,
         g: &GameDefinition,
         cell_id: Id<Cell>,
-    ) -> Result<bool, Error> {
+    ) -> Result<(), Error> {
         assert!(!self.turn_order.is_empty());
 
         let class = g.classes.get(curr_char.class).expect("Invalid class id");
@@ -215,9 +226,9 @@ impl GameState {
             )
         {
             self.turn_state = TurnState::ActionOnly;
-            Ok(false)
+            Ok(())
         } else {
-            panic!("Too far");
+            Err(Error::MoveCellTooFar)
         }
     }
 }

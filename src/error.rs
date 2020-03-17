@@ -9,11 +9,15 @@ pub enum Error {
     // character creation (before game starts)
     TeamFull,
     InvalidCharacterName,
-    InvalidCharacterClass,
     InvalidStartingCell,
+    InvalidCharacterClass,
 
-    // client-error (wrong value is API request)
+    // player action
     InvalidSkill,
+    AlreadyMoved,
+    InvalidTarget,
+    InvalidRange,
+    MoveCellTooFar,
 }
 
 impl Display for Error {
@@ -30,14 +34,18 @@ impl Display for Error {
             Error::InvalidStartingCell => {
                 f.write_str("Initial position is either not a starting cell, or is already taken")
             }
-            Error::InvalidCharacterName => {
-                f.write_str("Character's name cannot be made only of whitespaces")
-            }
             Error::InvalidCharacterClass => {
                 f.write_str("Class id does not correspond to an existing class")
             }
+            Error::InvalidCharacterName => {
+                f.write_str("Character's name cannot be made only of whitespaces")
+            }
 
             Error::InvalidSkill => f.write_str("Team is already full"),
+            Error::AlreadyMoved => f.write_str("Character has already moved"),
+            Error::InvalidTarget => f.write_str("Target is invalid"),
+            Error::InvalidRange => f.write_str("Range is invalid"),
+            Error::MoveCellTooFar => f.write_str("Character cannot move that far"),
         }
     }
 }
