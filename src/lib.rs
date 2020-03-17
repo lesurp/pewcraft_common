@@ -1,8 +1,5 @@
 mod id_map;
-
-pub use id_map::{Id, IdMapBuilder, IdMap};
-
-pub mod action;
+pub use id_map::{Id, IdMap, IdMapBuilder};
 
 mod character;
 pub use character::{Character, CharacterMapBuilder};
@@ -10,9 +7,20 @@ pub use character::{Character, CharacterMapBuilder};
 mod game_definition;
 pub use game_definition::GameDefinition;
 
-pub mod game_state;
-pub mod class;
-pub mod damage;
-pub mod effect;
-pub mod map;
-pub mod skill;
+mod game_state;
+pub use game_state::{Action, GameState};
+
+mod class;
+pub use class::Class;
+
+mod damage;
+pub use damage::Damage;
+
+mod effect;
+pub use effect::Effect;
+
+mod map;
+pub use map::{Cell, GameMap, Team};
+
+mod skill;
+pub use skill::Skill;

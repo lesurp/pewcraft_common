@@ -5,19 +5,6 @@ use std::cmp::{Ord, Ordering, Reverse};
 use std::collections::{BinaryHeap, HashSet};
 use std::ops::Index;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Copy)]
-pub struct TeamId(usize);
-
-impl TeamId {
-    pub fn new(id: usize) -> Self {
-        TeamId(id)
-    }
-
-    pub fn raw(self) -> usize {
-        self.0
-    }
-}
-
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct Team(pub String, pub HashSet<Id<Cell>>);
 
