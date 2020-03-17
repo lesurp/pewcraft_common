@@ -1,4 +1,4 @@
-use crate::game_definition::effect::{EffectId, Range};
+use crate::effect::{EffectId, Range};
 use crate::id::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;

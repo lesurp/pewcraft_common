@@ -1,6 +1,6 @@
-use crate::game_definition::class::*;
-use crate::game_definition::effect::Buff;
-use crate::game_definition::map::{CellId, Team, TeamId};
+use crate::class::*;
+use crate::effect::Buff;
+use crate::map::{CellId, Team, TeamId};
 use crate::id::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;

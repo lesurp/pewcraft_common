@@ -1,5 +1,5 @@
-use crate::game_definition::map::CellId;
-use crate::game_definition::skill::SkillId;
+use crate::map::CellId;
+use crate::skill::SkillId;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

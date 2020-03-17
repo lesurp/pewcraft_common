@@ -1,12 +1,10 @@
-pub mod action;
-pub mod character;
 
-use crate::game_definition::effect::{EffectKind, Range, RangeKind, Target};
-use crate::game_definition::map::{CellId, GameMapId};
-use crate::game_definition::skill::SkillId;
+use crate::effect::{EffectKind, Range, RangeKind, Target};
+use crate::map::{CellId, GameMapId};
+use crate::skill::SkillId;
 use crate::game_definition::GameDefinition;
 use crate::id::Map;
-use character::{Character, CharacterId};
+use crate::character::{Character, CharacterId};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 

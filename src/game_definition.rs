@@ -1,17 +1,10 @@
+use crate::class::{Class, ClassId};
+use crate::effect::Effect;
 use crate::id::Map;
-pub use class::{Class, ClassId};
-pub use damage::Damage;
-pub use effect::{Buff, Effect};
-pub use map::GameMap;
-pub use serde::{Deserialize, Serialize};
-pub use skill::{Skill, SkillId};
-pub use std::collections::HashMap;
-
-pub mod class;
-pub mod damage;
-pub mod effect;
-pub mod map;
-pub mod skill;
+use crate::map::GameMap;
+use crate::skill::{Skill, SkillId};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GameDefinition {

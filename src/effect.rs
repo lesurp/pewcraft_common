@@ -1,5 +1,5 @@
-use crate::game_definition::class::Attribute;
-use crate::game_definition::damage::Damage;
+use crate::class::Attribute;
+use crate::damage::Damage;
 use crate::id::*;
 use serde::{Deserialize, Serialize};
 
