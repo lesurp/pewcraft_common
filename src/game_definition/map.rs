@@ -2,12 +2,28 @@ use crate::id::*;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::cmp::{Ord, Ordering, Reverse};
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashSet};
 use std::ops::Index;
 
 pub type GameMapId = Id<GameMap>;
 pub type CellId = Id<Cell>;
 pub type GameMapBuilder = MapBuilder<GameMap>;
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash, Copy)]
+pub struct TeamId(usize);
+
+impl TeamId {
+    pub fn new(id: usize) -> Self {
+        TeamId(id)
+    }
+
+    pub fn raw(self) -> usize {
+        self.0
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub struct Team(pub String, pub HashSet<CellId>);
 
 impl CellId {
     fn invalid() -> CellId {
@@ -32,12 +48,11 @@ pub struct Cell {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GameMap {
-    name: String,
-    data: Vec<Cell>,
-    width: usize,
-
-    #[serde(skip)]
-    height: usize,
+    pub name: String,
+    pub data: Vec<Cell>,
+    pub width: usize,
+    pub height: usize,
+    pub teams: Vec<Team>,
 }
 
 // Used internally for the A* path computation
@@ -72,9 +87,7 @@ impl PartialEq for Node {
 }
 
 impl GameMap {
-    pub fn check_validity(&mut self) -> Result<(), ()> {
-        self.height = self.data.len() / self.width;
-
+    pub fn check_validity(&self) -> Result<(), ()> {
         if self.height * self.width != self.data.len() {
             return Err(());
         }
@@ -209,6 +222,8 @@ mod test {
             width: w,
             height: h,
             data: Vec::new(),
+            starting_cells_1: Default::default(),
+            starting_cells_2: Default::default(),
         };
 
         let x = 1;
@@ -228,6 +243,8 @@ mod test {
             width: w,
             height: h,
             data: Vec::new(),
+            starting_cells_1: Default::default(),
+            starting_cells_2: Default::default(),
         };
 
         let cell_id = CellId::new(22);
@@ -246,6 +263,8 @@ mod test {
             width: w,
             height: h,
             data: Vec::new(),
+            starting_cells_1: Default::default(),
+            starting_cells_2: Default::default(),
         };
 
         let cell_id = CellId::new(22);

@@ -1,22 +1,64 @@
 use crate::game_definition::class::*;
 use crate::game_definition::effect::Buff;
-use crate::game_definition::map::CellId;
+use crate::game_definition::map::{CellId, Team, TeamId};
 use crate::id::*;
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 pub type CharacterId = Id<Character>;
 pub type CharacterMap = Map<Character>;
-pub type ClassMapBuilder = MapBuilder<Character>;
+
+#[derive(Debug)]
+pub struct CharacterMapBuilder {
+    builder: MapBuilder<Character>,
+    empty_starting_cells: Vec<(usize, HashSet<CellId>)>,
+}
+
+impl CharacterMapBuilder {
+    pub fn new(teams: &[Team], team_size: usize) -> Self {
+        CharacterMapBuilder {
+            builder: MapBuilder::new(),
+            empty_starting_cells: teams
+                .iter()
+                .map(|team| (team_size, team.1.clone()))
+                .collect(),
+        }
+    }
+
+    pub fn add(&mut self, c: Character) -> Result<(), ()> {
+        let (spots_left, cells_left) = &mut self
+            .empty_starting_cells
+            .get_mut(c.team.raw())
+            .expect("Wrong team id was assigned to the character");
+
+        // Team is full
+        if *spots_left == 0 {
+            return Err(());
+        }
+
+        // Available cells left
+        if !cells_left.remove(&c.position) {
+            return Err(());
+        }
+
+        *spots_left -= 1;
+        self.builder.add(c);
+        Ok(())
+    }
+
+    pub fn build(self) -> Result<CharacterMap, Self> {
+        for (spots_left, _) in &self.empty_starting_cells {
+            if *spots_left > 0 {
+                return Err(self);
+            }
+        }
+        Ok(self.builder.build())
+    }
+}
 
 // TODO: store the applier of the buff's stats here!
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BuffInstance(Buff, ());
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub enum Team {
-    Evil,
-    Eviler,
-}
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Character {
@@ -27,7 +69,7 @@ pub struct Character {
     pub current_mana: i32,
     pub position: CellId,
     pub buffs: Vec<BuffInstance>,
-    pub team: Team,
+    pub team: TeamId,
 }
 
 impl Character {
@@ -36,7 +78,7 @@ impl Character {
         position: CellId,
         class: &Class,
         name: S,
-        team: Team,
+        team: TeamId,
     ) -> Character {
         Character {
             name: name.into(),
