@@ -75,6 +75,10 @@ impl<T> IdMap<T> {
     pub fn iter_mut(&mut self) -> IterMut<'_, Id<T>, T> {
         self.0.iter_mut()
     }
+
+    pub fn ids(&self) -> Vec<Id<T>> {
+       self.0.keys().into_iter().map(|id| *id).collect()
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
