@@ -52,8 +52,11 @@ impl GameState {
         self.turn_order = turn_order.iter().map(|(id, _)| **id).collect::<Vec<_>>();
     }
 
-    pub fn player_to_play(&self) -> Option<Id<Character>> {
-        self.turn_order.last().cloned()
+    pub fn player_to_play(&self) -> Id<Character> {
+        self.turn_order
+            .last()
+            .cloned()
+            .expect("Turn is finished and should be reset")
     }
 
     pub fn next_action(&mut self, g: &GameDefinition, ga: Action) -> Result<bool, Error> {

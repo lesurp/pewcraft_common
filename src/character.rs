@@ -4,7 +4,7 @@ use crate::error::Error;
 use crate::game_definition::GameDefinition;
 use crate::id_map::{Id, IdMap, IdMapBuilder};
 use crate::map::Cell;
-use crate::map::Team;
+use crate::map::{GameMap, Team};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
@@ -16,18 +16,24 @@ pub struct CharacterMapBuilder<'a> {
 }
 
 impl<'a> CharacterMapBuilder<'a> {
-    pub fn new(game_definition: &'a GameDefinition, teams: &[Team], team_size: usize) -> Self {
+    pub fn new(game_definition: &'a GameDefinition, map_id: Id<GameMap>, team_size: usize) -> Self {
+        let empty_starting_cells = game_definition
+            .maps
+            .get(map_id)
+            .expect("Invalid map id")
+            .teams
+            .iter()
+            .map(|team| (team_size, team.1.clone()))
+            .collect();
+
         CharacterMapBuilder {
             builder: IdMapBuilder::new(),
-            empty_starting_cells: teams
-                .iter()
-                .map(|team| (team_size, team.1.clone()))
-                .collect(),
+            empty_starting_cells,
             game_definition,
         }
     }
 
-    pub fn add(&mut self, c: Character) -> Result<(), Error> {
+    pub fn add(&mut self, c: Character) -> Result<Id<Character>, Error> {
         let (spots_left, cells_left) = &mut self
             .empty_starting_cells
             .get_mut(c.team.raw())
@@ -52,11 +58,26 @@ impl<'a> CharacterMapBuilder<'a> {
         }
 
         *spots_left -= 1;
-        self.builder.add(c);
-        Ok(())
+        Ok(self.builder.add(c))
     }
 
-    pub fn build(self) -> Result<IdMap<Character>, Self> {
+    pub fn can_build(&self) -> bool {
+        for (spots_left, _) in &self.empty_starting_cells {
+            if *spots_left > 0 {
+                return false;
+            }
+        }
+        true
+    }
+
+    pub fn build(self) -> IdMap<Character> {
+        for (spots_left, _) in &self.empty_starting_cells {
+            debug_assert!(*spots_left == 0);
+        }
+        self.builder.build()
+    }
+
+    pub fn try_build(self) -> Result<IdMap<Character>, Self> {
         for (spots_left, _) in &self.empty_starting_cells {
             if *spots_left > 0 {
                 return Err(self);
