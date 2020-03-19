@@ -1,8 +1,8 @@
-use crate::class::Class;
-use crate::effect::Effect;
-use crate::id_map::{Id, IdMap};
-use crate::map::GameMap;
-use crate::skill::Skill;
+use crate::game::class::Class;
+use crate::game::effect::Effect;
+use crate::game::id_map::{Id, IdMap};
+use crate::game::map::GameMap;
+use crate::game::skill::Skill;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 

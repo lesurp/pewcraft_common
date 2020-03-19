@@ -1,6 +1,6 @@
-use crate::class::Attribute;
-use crate::damage::Damage;
-use crate::id_map::Id;
+use crate::game::class::Attribute;
+use crate::game::damage::Damage;
+use crate::game::id_map::Id;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq)]

@@ -1,5 +1,5 @@
-use crate::effect::{Effect, Range};
-use crate::id_map::Id;
+use crate::game::effect::{Effect, Range};
+use crate::game::id_map::Id;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 

@@ -1,5 +1,5 @@
-use crate::error::Error;
-use crate::id_map::Id;
+use crate::game::error::Error;
+use crate::game::id_map::Id;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::cmp::{Ord, Ordering, Reverse};
@@ -204,7 +204,7 @@ impl Index<Id<Cell>> for GameMap {
 #[cfg(test)]
 mod test {
     use super::GameMap;
-    use crate::id_map::Id;
+    use crate::game::id_map::Id;
 
     #[test]
     fn test_xy_to_id() {

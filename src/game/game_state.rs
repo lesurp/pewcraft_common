@@ -1,10 +1,10 @@
-use crate::character::Character;
-use crate::effect::{EffectKind, Range, RangeKind, Target};
-use crate::error::Error;
-use crate::game_definition::GameDefinition;
-use crate::id_map::{Id, IdMap};
-use crate::map::{Cell, GameMap};
-use crate::skill::Skill;
+use crate::game::character::Character;
+use crate::game::effect::{EffectKind, Range, RangeKind, Target};
+use crate::game::error::Error;
+use crate::game::game_definition::GameDefinition;
+use crate::game::id_map::{Id, IdMap};
+use crate::game::map::{Cell, GameMap};
+use crate::game::skill::Skill;
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 

@@ -1,10 +1,10 @@
-use crate::class::Class;
-use crate::effect::Buff;
-use crate::error::Error;
-use crate::game_definition::GameDefinition;
-use crate::id_map::{Id, IdMap, IdMapBuilder};
-use crate::map::Cell;
-use crate::map::{GameMap, Team};
+use crate::game::class::Class;
+use crate::game::effect::Buff;
+use crate::game::error::Error;
+use crate::game::game_definition::GameDefinition;
+use crate::game::id_map::{Id, IdMap, IdMapBuilder};
+use crate::game::map::Cell;
+use crate::game::map::{GameMap, Team};
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 
