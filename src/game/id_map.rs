@@ -77,7 +77,7 @@ impl<T> IdMap<T> {
     }
 
     pub fn ids(&self) -> Vec<Id<T>> {
-       self.0.keys().into_iter().map(|id| *id).collect()
+       self.0.keys().copied().collect()
     }
 }
 
