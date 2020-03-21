@@ -203,8 +203,9 @@ impl Index<Id<Cell>> for GameMap {
 
 #[cfg(test)]
 mod test {
-    use super::GameMap;
+    use super::{Cell, CellAttibute, Error, GameMap, Team};
     use crate::game::id_map::Id;
+    use std::collections::HashSet;
 
     #[test]
     fn test_xy_to_id() {
@@ -261,5 +262,138 @@ mod test {
         let (x, y) = map.id_to_xy(cell_id);
 
         assert_eq!(cell_id, map.xy_to_id(x, y));
+    }
+
+    #[test]
+    fn test_validity_size_ok() {
+        let width = 5;
+        let height = 5;
+        let map = GameMap {
+            name: "".to_owned(),
+            width,
+            height,
+            data: vec![
+                Cell {
+                    height: 0,
+                    attribute: CellAttibute::None,
+                };
+                25
+            ],
+            teams: Default::default(),
+        };
+
+        assert!(matches!(map.check_validity(), Ok(())));
+    }
+
+    #[test]
+    fn test_validity_team_ok() {
+        let width = 5;
+        let height = 5;
+
+        let mut cells_first = HashSet::new();
+        cells_first.insert(Id::new(0));
+        cells_first.insert(Id::new(1));
+        let mut cells_second = HashSet::new();
+        cells_second.insert(Id::new(2));
+        cells_second.insert(Id::new(3));
+        let teams = vec![
+            Team("first".to_owned(), cells_first),
+            Team("second".to_owned(), cells_second),
+        ];
+
+        let map = GameMap {
+            name: "".to_owned(),
+            width,
+            height,
+            data: vec![
+                Cell {
+                    height: 0,
+                    attribute: CellAttibute::None,
+                };
+                25
+            ],
+            teams,
+        };
+
+        assert!(matches!(map.check_validity(), Ok(())));
+    }
+
+    #[test]
+    fn test_validity_size_nok() {
+        let width = 5;
+        let height = 2;
+        let map = GameMap {
+            name: "".to_owned(),
+            width,
+            height,
+            data: vec![
+                Cell {
+                    height: 0,
+                    attribute: CellAttibute::None,
+                };
+                20
+            ],
+            teams: Default::default(),
+        };
+
+        assert!(matches!(map.check_validity(), Err(Error::InvalidMapSize)));
+    }
+
+    #[test]
+    fn test_validity_team_nok() {
+        let width = 5;
+        let height = 5;
+
+        let mut cells_first = HashSet::new();
+        cells_first.insert(Id::new(0));
+        cells_first.insert(Id::new(1));
+        let mut cells_second = HashSet::new();
+        cells_second.insert(Id::new(10));
+        cells_second.insert(Id::new(20));
+        cells_second.insert(Id::new(0));
+        let teams = vec![
+            Team("first".to_owned(), cells_first),
+            Team("second".to_owned(), cells_second),
+        ];
+
+        let map = GameMap {
+            name: "".to_owned(),
+            width,
+            height,
+            data: vec![
+                Cell {
+                    height: 0,
+                    attribute: CellAttibute::None,
+                };
+                25
+            ],
+            teams,
+        };
+
+        assert!(matches!(map.check_validity(), Err(Error::OverlappingStartingCells)));
+    }
+
+    #[test]
+    fn test_a_star_basic() {
+        let width = 5;
+        let height = 5;
+        let map = GameMap {
+            name: "".to_owned(),
+            width,
+            height,
+            data: vec![
+                Cell {
+                    height: 0,
+                    attribute: CellAttibute::None,
+                };
+                25
+            ],
+            teams: Default::default(),
+        };
+
+        let start = Id::new(0);
+        let end = Id::new(4); 
+        assert!(map.can_move_to(start, end, 4));
+        assert!(!map.can_move_to(start, end, 3));
     }
 }
