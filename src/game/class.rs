@@ -16,6 +16,7 @@ pub enum Attribute {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Class {
     pub name: String,
+    pub description: String,
 
     // GENERIC STUFF
     pub health: i32,
