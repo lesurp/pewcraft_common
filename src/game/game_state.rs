@@ -23,10 +23,10 @@ pub enum Action {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GameState {
-    characters: IdMap<Character>,
-    map: Id<GameMap>,
-    turn_order: Vec<Id<Character>>,
-    turn_state: TurnState,
+    pub characters: IdMap<Character>,
+    pub map: Id<GameMap>,
+    pub turn_order: Vec<Id<Character>>,
+    pub turn_state: TurnState,
 }
 
 impl GameState {
