@@ -6,7 +6,6 @@ pub struct WireAction(pub Action);
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WireNewCharRequest {
-    pub game: String,
     pub name: String,
     pub class: Id<Class>,
     pub team: Id<Team>,

@@ -7,7 +7,7 @@ use std::collections::{BinaryHeap, HashSet};
 use std::ops::Index;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct Team(pub String, pub HashSet<Id<Cell>>);
+pub struct Team(pub String, pub Vec<Id<Cell>>);
 
 impl Id<Cell> {
     fn invalid() -> Id<Cell> {
@@ -205,7 +205,6 @@ impl Index<Id<Cell>> for GameMap {
 mod test {
     use super::{Cell, CellAttibute, Error, GameMap, Team};
     use crate::game::id_map::Id;
-    use std::collections::HashSet;
 
     #[test]
     fn test_xy_to_id() {
@@ -290,12 +289,8 @@ mod test {
         let width = 5;
         let height = 5;
 
-        let mut cells_first = HashSet::new();
-        cells_first.insert(Id::new(0));
-        cells_first.insert(Id::new(1));
-        let mut cells_second = HashSet::new();
-        cells_second.insert(Id::new(2));
-        cells_second.insert(Id::new(3));
+        let cells_first = vec![Id::new(0), Id::new(1)];
+        let cells_second = vec![Id::new(2), Id::new(3)];
         let teams = vec![
             Team("first".to_owned(), cells_first),
             Team("second".to_owned(), cells_second),
@@ -344,13 +339,8 @@ mod test {
         let width = 5;
         let height = 5;
 
-        let mut cells_first = HashSet::new();
-        cells_first.insert(Id::new(0));
-        cells_first.insert(Id::new(1));
-        let mut cells_second = HashSet::new();
-        cells_second.insert(Id::new(10));
-        cells_second.insert(Id::new(20));
-        cells_second.insert(Id::new(0));
+        let cells_first = vec![Id::new(0), Id::new(1)];
+        let cells_second = vec![Id::new(10), Id::new(20), Id::new(0)];
         let teams = vec![
             Team("first".to_owned(), cells_first),
             Team("second".to_owned(), cells_second),
@@ -370,7 +360,10 @@ mod test {
             teams,
         };
 
-        assert!(matches!(map.check_validity(), Err(Error::OverlappingStartingCells)));
+        assert!(matches!(
+            map.check_validity(),
+            Err(Error::OverlappingStartingCells)
+        ));
     }
 
     #[test]
@@ -392,7 +385,7 @@ mod test {
         };
 
         let start = Id::new(0);
-        let end = Id::new(4); 
+        let end = Id::new(4);
         assert!(map.can_move_to(start, end, 4));
         assert!(!map.can_move_to(start, end, 3));
     }

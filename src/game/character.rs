@@ -6,12 +6,11 @@ use crate::game::id_map::{Id, IdMap, IdMapBuilder};
 use crate::game::map::Cell;
 use crate::game::map::{GameMap, Team};
 use serde::{Deserialize, Serialize};
-use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct CharacterMapBuilder<'a> {
     builder: IdMapBuilder<Character>,
-    empty_starting_cells: Vec<(usize, HashSet<Id<Cell>>)>,
+    empty_starting_cells: Vec<(usize, Vec<Id<Cell>>)>,
     game_definition: &'a GameDefinition,
 }
 
@@ -53,7 +52,7 @@ impl<'a> CharacterMapBuilder<'a> {
         }
 
         // Available cells left
-        if !cells_left.remove(&c.position) {
+        if !cells_left.remove_item(&c.position).is_some() {
             return Err(Error::InvalidStartingCell);
         }
 
