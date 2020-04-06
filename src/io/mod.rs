@@ -1,4 +1,4 @@
-use crate::game::{Action, Cell, Character, Class, GameMap, Id, Team};
+use crate::game::{Action, Cell, Character, Class, GameMap, GameState, Id, Team};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -13,7 +13,11 @@ pub struct WireNewCharRequest {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct WireCreatedGame(pub String);
+pub struct WireCreatedGame {
+    pub game_id: String,
+    pub map: Id<GameMap>,
+    pub team_size: usize,
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct WireCreatedChar(pub String, pub Id<Character>);
@@ -22,4 +26,11 @@ pub struct WireCreatedChar(pub String, pub Id<Character>);
 pub struct WireNewGameRequest {
     pub map: Id<GameMap>,
     pub team_size: usize,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub enum WireGetGame {
+    Running(GameState),
+    BeingCreated(Id<GameMap>, usize),
+    None,
 }
